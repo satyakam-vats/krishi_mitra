@@ -331,41 +331,15 @@ npm run test:integration # Integration tests
 4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-### Development Guidelines
-- Follow TypeScript best practices
-- Write comprehensive tests
-- Update documentation
-- Follow semantic versioning
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
-
-### Documentation
-- [User Guide](docs/user-guide.md)
-- [API Reference](docs/api-reference.md)
-- [Deployment Guide](docs/deployment.md)
-
-### Contact
-- **Email**: support@agriadvisor.com
-- **Phone**: +91 123 456 7890
-- **WhatsApp**: +91 123 456 7890
-
-### Community
-- [GitHub Issues](https://github.com/agriadvisor/issues)
-- [Discord Community](https://discord.gg/agriadvisor)
-- [Telegram Group](https://t.me/agriadvisor)
 
 ## 🙏 Acknowledgments
 
-- Farmers who provided feedback and testing
-- Open source community for tools and libraries
-- Agricultural experts for domain knowledge
-- Government APIs for market data access
 
----
 
 **Built with ❤️ for farmers worldwide**
 
