@@ -1,20 +1,23 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { Box, CircularProgress } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
+import './i18n'; // Initialize i18n
 
 // Components
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Diagnostics from './pages/Diagnostics';
 import Irrigation from './pages/Irrigation';
-import Market from './pages/Market';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import DiseaseOutbreakMap from './pages/DiseaseOutbreakMap';
 
 // Context
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { OfflineProvider } from './context/OfflineContext';
 
 // Create custom theme
@@ -97,34 +100,50 @@ const theme = createTheme({
   },
 });
 
+const AppContent: React.FC = () => {
+  const { isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+        bgcolor="background.default"
+      >
+        <CircularProgress size={60} />
+      </Box>
+    );
+  }
+
+  return (
+    <Router>
+      <div className="App">
+        <Navbar />
+        
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/diagnostics" element={<Diagnostics />} />
+          <Route path="/irrigation" element={<Irrigation />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/outbreak-map" element={<DiseaseOutbreakMap />} />
+        </Routes>
+      </div>
+    </Router>
+  );
+};
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
         <OfflineProvider>
-          <Router>
-            <div className="App">
-              {/* Animated background */}
-              <div className="animated-bg">
-                <div className="particle"></div>
-                <div className="particle"></div>
-                <div className="particle"></div>
-              </div>
-              
-              <Navbar />
-              
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/diagnostics" element={<Diagnostics />} />
-                <Route path="/irrigation" element={<Irrigation />} />
-                <Route path="/market" element={<Market />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-              </Routes>
-            </div>
-          </Router>
+          <AppContent />
         </OfflineProvider>
       </AuthProvider>
     </ThemeProvider>

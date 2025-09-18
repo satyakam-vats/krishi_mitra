@@ -35,11 +35,11 @@ const generateMockWeatherData = (lat, lon) => ({
 });
 
 // @route   GET /api/weather/current
-// @desc    Get current weather data
+// @desc    Get real-time current weather data
 // @access  Private
 router.get('/current', auth, async (req, res) => {
   try {
-    const { lat, lon } = req.query;
+    const { lat, lon, apiKey } = req.query;
 
     if (!lat || !lon) {
       return res.status(400).json({
@@ -48,52 +48,92 @@ router.get('/current', auth, async (req, res) => {
       });
     }
 
+    // Use user-provided API key or fallback to environment variable
+    const weatherApiKey = apiKey || process.env.OPENWEATHER_API_KEY;
+    
     let weatherData;
 
-    if (process.env.OPENWEATHER_API_KEY && process.env.NODE_ENV === 'production') {
-      // Use real OpenWeather API in production
+    if (weatherApiKey) {
+      // Always try to use real API for real-time data
       try {
-        const response = await axios.get('https://api.openweathermap.org/data/2.5/weather', {
+        // Get current weather
+        const currentResponse = await axios.get('https://api.openweathermap.org/data/2.5/weather', {
           params: {
             lat,
             lon,
-            appid: process.env.OPENWEATHER_API_KEY,
+            appid: weatherApiKey,
             units: 'metric',
           },
-          timeout: 5000,
+          timeout: 10000,
         });
 
-        const data = response.data;
+        // Get UV Index from One Call API
+        let uvIndex = 0;
+        try {
+          const uvResponse = await axios.get('https://api.openweathermap.org/data/2.5/onecall', {
+            params: {
+              lat,
+              lon,
+              appid: weatherApiKey,
+              exclude: 'minutely,hourly,daily,alerts',
+            },
+            timeout: 5000,
+          });
+          uvIndex = uvResponse.data.current?.uvi || 0;
+        } catch (uvError) {
+          console.log('UV data not available');
+        }
+
+        const data = currentResponse.data;
         weatherData = {
           current: {
-            temperature: data.main.temp,
+            temperature: Math.round(data.main.temp * 10) / 10,
             humidity: data.main.humidity,
-            rainfall: data.rain?.['1h'] || 0,
-            windSpeed: data.wind.speed * 3.6, // Convert m/s to km/h
+            rainfall: data.rain?.['1h'] || data.rain?.['3h'] || 0,
+            windSpeed: Math.round(data.wind.speed * 3.6 * 10) / 10, // Convert m/s to km/h
             pressure: data.main.pressure,
-            uvIndex: 0, // Not available in current weather API
+            uvIndex: uvIndex,
             visibility: data.visibility / 1000, // Convert to km
+            condition: data.weather[0].main,
+            description: data.weather[0].description,
+            icon: data.weather[0].icon,
           },
           location: {
             latitude: parseFloat(lat),
             longitude: parseFloat(lon),
             name: data.name,
+            country: data.sys.country,
           },
+          realTime: true,
+          source: 'OpenWeatherMap',
         };
       } catch (apiError) {
         console.error('OpenWeather API error:', apiError.message);
-        // Fallback to mock data
+        
+        if (apiError.response?.status === 401) {
+          return res.status(401).json({
+            error: 'Invalid API Key',
+            message: 'The provided weather API key is invalid or expired',
+          });
+        }
+        
+        // Fallback to mock data with warning
         weatherData = generateMockWeatherData(parseFloat(lat), parseFloat(lon));
+        weatherData.realTime = false;
+        weatherData.source = 'Mock Data (API Error)';
       }
     } else {
-      // Use mock data for development
+      // Use mock data when no API key available
       weatherData = generateMockWeatherData(parseFloat(lat), parseFloat(lon));
+      weatherData.realTime = false;
+      weatherData.source = 'Mock Data (No API Key)';
     }
 
     res.json({
       message: 'Weather data retrieved successfully',
       data: weatherData,
       timestamp: new Date().toISOString(),
+      isRealTime: weatherData.realTime,
     });
   } catch (error) {
     console.error('Weather fetch error:', error);

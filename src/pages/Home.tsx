@@ -47,14 +47,6 @@ const Home: React.FC = () => {
       color: '#2196f3',
       benefits: ['Water conservation', 'Weather integration', 'Crop-specific advice'],
     },
-    {
-      title: 'Market Intelligence',
-      description: 'Real-time crop prices and market trends in your region',
-      icon: <TrendingUp sx={{ fontSize: 40 }} />,
-      path: '/market',
-      color: '#ff9800',
-      benefits: ['Price alerts', 'Market trends', 'Best selling times'],
-    },
   ];
 
 

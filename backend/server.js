@@ -10,8 +10,8 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const cropRoutes = require('./routes/crops');
 const weatherRoutes = require('./routes/weather');
-const marketRoutes = require('./routes/market');
 const syncRoutes = require('./routes/sync');
+const outbreakRoutes = require('./routes/outbreaks');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -58,8 +58,8 @@ mongoose.connect(MONGODB_URI, {
 app.use('/api/auth', authRoutes);
 app.use('/api/crops', cropRoutes);
 app.use('/api/weather', weatherRoutes);
-app.use('/api/market', marketRoutes);
 app.use('/api/sync', syncRoutes);
+app.use('/api/outbreaks', outbreakRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

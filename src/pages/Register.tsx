@@ -1,23 +1,28 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Typography,
-  Box,
   TextField,
   Button,
-  Card,
-  CardContent,
+  Box,
   Alert,
   Grid,
-  InputAdornment,
-  IconButton,
+  Card,
+  CardContent,
   Chip,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
+  InputAdornment,
+  IconButton,
+  Link,
 } from '@mui/material';
+import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import { Link as RouterLink } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import {
   Person,
   Email,
@@ -28,10 +33,9 @@ import {
   Visibility,
   VisibilityOff,
 } from '@mui/icons-material';
-import { motion } from 'framer-motion';
-import { useAuth } from '../context/AuthContext';
 
 const Register: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { register } = useAuth();
   
@@ -152,11 +156,11 @@ const Register: React.FC = () => {
       >
         <Box textAlign="center" mb={4}>
           <Agriculture sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
-          <Typography variant="h2" component="h1" gutterBottom>
-            Join AgriAdvisor
+          <Typography variant="h2" component="h1" textAlign="center" gutterBottom>
+            {t('auth.joinAgriAdvisor')}
           </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Create your account and start smart farming today
+          <Typography variant="body1" textAlign="center" color="text.secondary" paragraph>
+            {t('auth.createAccount')}
           </Typography>
         </Box>
 
@@ -436,12 +440,13 @@ const Register: React.FC = () => {
             <Box textAlign="center" mt={3}>
               <Typography variant="body2" color="text.secondary">
                 Already have an account?{' '}
-                <Link 
-                  to="/login" 
-                  style={{ 
-                    color: '#2e7d32', 
+                <Link
+                  component={RouterLink}
+                  to="/login"
+                  style={{
+                    color: '#2e7d32',
                     textDecoration: 'none',
-                    fontWeight: 500 
+                    fontWeight: 500
                   }}
                 >
                   Sign in here

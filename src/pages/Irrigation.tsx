@@ -10,28 +10,31 @@ import {
   Alert,
   Chip,
   LinearProgress,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
 } from '@mui/material';
 import {
   WaterDrop,
   Thermostat,
-  Cloud,
   Opacity,
+  Air,
+  Refresh,
+  LocationOn,
   Agriculture,
   Schedule,
+  ExpandMore,
   TrendingUp,
+  Cloud,
   Warning,
   CheckCircle,
-  ExpandMore,
-  LocationOn,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useLocation as useGeolocation } from '../hooks/useLocation';
 import { useOffline } from '../context/OfflineContext';
 
@@ -58,6 +61,7 @@ interface IrrigationRecommendation {
 }
 
 const Irrigation: React.FC = () => {
+  const { t } = useTranslation();
   const { getCurrentLocation } = useGeolocation();
   const { saveOfflineData, isOnline } = useOffline();
   
@@ -69,18 +73,18 @@ const Irrigation: React.FC = () => {
   const [soilType, setSoilType] = useState<string>('loamy');
 
   const crops = [
-    { value: 'tomato', label: 'Tomato', waterNeed: 'high' },
-    { value: 'wheat', label: 'Wheat', waterNeed: 'medium' },
-    { value: 'rice', label: 'Rice', waterNeed: 'very_high' },
-    { value: 'corn', label: 'Corn', waterNeed: 'medium' },
-    { value: 'potato', label: 'Potato', waterNeed: 'medium' },
-    { value: 'onion', label: 'Onion', waterNeed: 'low' },
+    { value: 'tomato', label: t('crops.tomato'), waterNeed: 'high' },
+    { value: 'wheat', label: t('crops.wheat'), waterNeed: 'medium' },
+    { value: 'rice', label: t('crops.rice'), waterNeed: 'very_high' },
+    { value: 'corn', label: t('crops.corn'), waterNeed: 'medium' },
+    { value: 'potato', label: t('crops.potato'), waterNeed: 'medium' },
+    { value: 'onion', label: t('crops.onion'), waterNeed: 'low' },
   ];
 
   const soilTypes = [
-    { value: 'sandy', label: 'Sandy', drainageRate: 'fast' },
-    { value: 'loamy', label: 'Loamy', drainageRate: 'medium' },
-    { value: 'clay', label: 'Clay', drainageRate: 'slow' },
+    { value: 'sandy', label: t('soilTypes.sandy'), drainageRate: 'fast' },
+    { value: 'loamy', label: t('soilTypes.loamy'), drainageRate: 'medium' },
+    { value: 'clay', label: t('soilTypes.clay'), drainageRate: 'slow' },
   ];
 
   useEffect(() => {
@@ -144,21 +148,51 @@ const Irrigation: React.FC = () => {
   };
 
   const fetchWeatherData = async (lat: number, lon: number): Promise<WeatherData> => {
-    // Mock weather API call - in production, use OpenWeather API
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    return {
-      temperature: 28 + Math.random() * 10,
-      humidity: 60 + Math.random() * 30,
-      rainfall: Math.random() * 10,
-      windSpeed: 5 + Math.random() * 10,
-      forecast: Array.from({ length: 5 }, (_, i) => ({
-        date: new Date(Date.now() + i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        temp: 25 + Math.random() * 15,
-        humidity: 50 + Math.random() * 40,
-        rainfall: Math.random() * 15,
-      })),
-    };
+    try {
+      // Call real backend API for current weather
+      const response = await fetch(`/api/weather/current?lat=${lat}&lon=${lon}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch weather data');
+      }
+      
+      const result = await response.json();
+      const current = result.data.current;
+      
+      // Get forecast data
+      const forecastResponse = await fetch(`/api/weather/forecast?lat=${lat}&lon=${lon}&days=5`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+        },
+      });
+      
+      let forecast = [];
+      if (forecastResponse.ok) {
+        const forecastResult = await forecastResponse.json();
+        forecast = forecastResult.data.forecast || [];
+      }
+      
+      return {
+        temperature: current.temperature,
+        humidity: current.humidity,
+        rainfall: current.rainfall || 0,
+        windSpeed: current.windSpeed,
+        forecast: forecast.slice(0, 5).map((day: any) => ({
+          date: day.date,
+          temp: day.temperature?.max || day.temperature || current.temperature,
+          humidity: day.humidity || current.humidity,
+          rainfall: day.rainfall || 0,
+        })),
+      };
+    } catch (error) {
+      console.error('Weather API error:', error);
+      // Fallback to mock data if API fails
+      return generateMockWeatherData();
+    }
   };
 
   const generateMockWeatherData = (): WeatherData => ({
@@ -274,15 +308,15 @@ const Irrigation: React.FC = () => {
         transition={{ duration: 0.6 }}
       >
         <Typography variant="h2" component="h1" textAlign="center" gutterBottom>
-          Smart Irrigation Advisor
+          {t('weather.smartIrrigation')}
         </Typography>
         <Typography variant="body1" textAlign="center" color="text.secondary" paragraph>
-          Weather-based irrigation recommendations for optimal water usage
+          {t('weather.weatherBasedRecommendations')}
         </Typography>
 
         {!isOnline && (
           <Alert severity="info" sx={{ mb: 3 }}>
-            You're offline. Using cached weather data and basic recommendations.
+            {t('weather.offlineMode')}
           </Alert>
         )}
 
@@ -302,12 +336,12 @@ const Irrigation: React.FC = () => {
         <Card className="card" sx={{ mb: 4 }}>
           <CardContent>
             <Typography variant="h5" gutterBottom>
-              Farm Configuration
+              {t('weather.farmConfiguration')}
             </Typography>
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
                 <Typography variant="subtitle1" gutterBottom>
-                  Select Crop
+                  {t('weather.selectCrop')}
                 </Typography>
                 <Box display="flex" flexWrap="wrap" gap={1}>
                   {crops.map((crop) => (
@@ -353,14 +387,14 @@ const Irrigation: React.FC = () => {
             <Card className="card">
               <CardContent>
                 <Typography variant="h5" gutterBottom>
-                  Current Weather
+                  {t('weather.currentWeather')}
                 </Typography>
 
                 {loading ? (
                   <Box>
                     <LinearProgress sx={{ mb: 2 }} />
                     <Typography variant="body2" color="text.secondary">
-                      Fetching weather data...
+                      {t('weather.fetchingWeather')}
                     </Typography>
                   </Box>
                 ) : weatherData ? (

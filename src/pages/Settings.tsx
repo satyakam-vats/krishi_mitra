@@ -38,6 +38,7 @@ import {
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useOffline } from '../context/OfflineContext';
+import ApiKeySettings from '../components/ApiKeySettings';
 
 const Settings: React.FC = () => {
   const { user, logout } = useAuth();
@@ -387,12 +388,23 @@ const Settings: React.FC = () => {
           </motion.div>
         </Grid>
 
+        {/* API Configuration */}
+        <Grid item xs={12}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1.0 }}
+          >
+            <ApiKeySettings />
+          </motion.div>
+        </Grid>
+
         {/* App Information */}
         <Grid item xs={12} md={6}>
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 1.0 }}
+            transition={{ duration: 0.6, delay: 1.2 }}
           >
             <Card className="card">
               <CardContent>

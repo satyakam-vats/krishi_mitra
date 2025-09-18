@@ -24,11 +24,13 @@ import {
   Logout,
   Wifi,
   WifiOff,
+  Warning,
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { useCamera } from '../hooks/useCamera';
 import { useLocation as useGeolocation } from '../hooks/useLocation';
 import { useOffline } from '../context/OfflineContext';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
@@ -85,9 +87,10 @@ const Navbar: React.FC = () => {
 
   const navItems = [
     { path: '/', label: 'Home', icon: <Agriculture /> },
+    ...(isAuthenticated ? [{ path: '/dashboard', label: 'Dashboard', icon: <AccountCircle /> }] : []),
     { path: '/diagnostics', label: 'Scan Crop', icon: <CameraAlt /> },
     { path: '/irrigation', label: 'Irrigation', icon: <WaterDrop /> },
-    { path: '/market', label: 'Market', icon: <TrendingUp /> },
+    { path: '/outbreak-map', label: 'Disease Map', icon: <Warning /> },
   ];
 
   return (
@@ -179,6 +182,9 @@ const Navbar: React.FC = () => {
               <LocationOn />
             </IconButton>
           </Tooltip>
+
+          {/* Language Switcher */}
+          <LanguageSwitcher />
 
           {/* Online/Offline Toggle */}
           <Tooltip title={isOnline ? "Go Offline" : "Go Online"}>

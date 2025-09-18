@@ -6,17 +6,22 @@ A comprehensive Progressive Web Application (PWA) designed to empower smallholde
 
 ### Core Functionality
 - **AI-Powered Crop Disease Detection**: Upload or capture crop images for instant disease diagnosis
-- **Smart Irrigation Advisor**: Weather-based irrigation recommendations with water conservation tips
-- **Market Intelligence**: Real-time crop prices, trends, and buyer connections
+- **Smart Irrigation Advisor**: Real-time weather-based irrigation recommendations with configurable API keys
+- **Disease Outbreak Map**: Real-time disease outbreak tracking and regional alerts
+- **User Dashboard**: Personalized farming dashboard with activity tracking
 - **Offline-First Design**: Full functionality without internet connection
-- **Multi-language Support**: Accessible in multiple regional languages
+- **Multi-language Support**: Native support for Hindi, Kannada, Tamil, Telugu, and English
 
 ### Technical Highlights
 - **Progressive Web App (PWA)**: Installable, fast, and reliable
 - **Offline Capabilities**: IndexedDB storage with automatic sync
-- **AI/ML Integration**: TensorFlow.js for client-side inference
+- **AI/ML Integration**: TensorFlow.js for client-side inference with custom model training support
+- **MongoDB Atlas Integration**: Cloud database with secure authentication
+- **Real-time Alerts**: Disease outbreak notifications for nearby farmers
+- **Configurable APIs**: Support for custom weather and disease detection APIs
 - **Responsive Design**: Optimized for mobile and desktop
 - **Glassmorphic UI**: Modern, farmer-friendly interface
+- **i18n Support**: Complete internationalization framework
 
 ## 🚀 Quick Start
 
@@ -51,9 +56,11 @@ cd ..
 cp backend/.env.example backend/.env
 
 # Update backend/.env with your configuration:
-# - MongoDB connection string
+# - MongoDB Atlas connection string (for production)
 # - JWT secret
-# - API keys for weather/market services
+# - OpenWeather API key for real-time weather
+# - Custom disease model API keys
+# - Notification service credentials
 ```
 
 5. **Start the application**
@@ -73,18 +80,22 @@ The application will be available at `http://localhost:3000`
 
 ### For Farmers
 1. **Register/Login**: Create an account with farm details
-2. **Crop Diagnosis**: 
+2. **Dashboard**: View personalized farming insights and recent activity
+3. **Crop Diagnosis**: 
    - Take photos of crops using camera
    - Get instant AI-powered disease detection
    - Receive treatment recommendations
-3. **Irrigation Planning**:
-   - Get weather-based watering advice
-   - Optimize water usage
+4. **Irrigation Planning**:
+   - Get real-time weather-based watering advice
+   - Optimize water usage with configurable API keys
    - Set irrigation reminders
-4. **Market Intelligence**:
-   - Check current crop prices
-   - Find potential buyers
-   - Set price alerts
+5. **Disease Outbreak Map**:
+   - View regional disease outbreaks
+   - Get alerts for nearby disease reports
+   - Report disease cases to help the community
+6. **Multi-language Support**:
+   - Switch between Hindi, Kannada, Tamil, Telugu, and English
+   - Native language interface for better accessibility
 
 ### Offline Mode
 - All core features work without internet
@@ -102,10 +113,12 @@ The application will be available at `http://localhost:3000`
 
 ### Backend Stack
 - **Node.js** with Express
-- **MongoDB** with Mongoose
-- **JWT** authentication
+- **MongoDB Atlas** with Mongoose ODM
+- **JWT** authentication with secure token management
 - **Multer** for file uploads
 - **Sharp** for image processing
+- **Real-time outbreak tracking** with geospatial queries
+- **Notification system** for disease alerts
 
 ### AI/ML Pipeline
 - **TensorFlow.js** for client-side inference
@@ -119,22 +132,85 @@ The application will be available at `http://localhost:3000`
 
 **Backend (.env)**
 ```env
+# Server Configuration
 NODE_ENV=development
 PORT=5000
-MONGODB_URI=mongodb://localhost:27017/agri-advisor
-JWT_SECRET=your-secret-key
-OPENWEATHER_API_KEY=your-api-key
+
+# Database - MongoDB Atlas
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/agri-advisor
+
+# Authentication
+JWT_SECRET=your-super-secret-jwt-key
+JWT_EXPIRES_IN=7d
+
+# Weather APIs
+OPENWEATHER_API_KEY=your-openweather-api-key
+WEATHERAPI_KEY=your-weatherapi-key
+
+# Disease Detection
+CUSTOM_DISEASE_MODEL_API_KEY=your-custom-model-api-key
+CUSTOM_DISEASE_MODEL_URL=https://your-model-endpoint.com/api/predict
+
+# Notifications
+TWILIO_ACCOUNT_SID=your-twilio-account-sid
+TWILIO_AUTH_TOKEN=your-twilio-auth-token
+FCM_SERVER_KEY=your-firebase-server-key
+
+# Disease Outbreak Configuration
+ALERT_RADIUS_KM=25
+CRITICAL_OUTBREAK_THRESHOLD=10
+AUTO_ALERT_ENABLED=true
+
+# Internationalization
+DEFAULT_LANGUAGE=en
+SUPPORTED_LANGUAGES=en,hi,kn,ta,te
 ```
 
 **Frontend**
-Configuration is handled through environment variables and can be set in `.env.local`
+Configuration is handled through the Settings page where users can input their own API keys securely.
 
 ### API Keys Required
-- **OpenWeather API**: For weather data
-- **Google Maps API**: For location services (optional)
-- **Agricultural Market APIs**: For real-time pricing (optional)
+- **OpenWeather API**: For real-time weather data
+- **Custom Disease Model API**: For enhanced disease detection (optional)
+- **MongoDB Atlas**: For cloud database (production)
+- **Twilio**: For SMS notifications (optional)
+- **Firebase**: For push notifications (optional)
 
 ## 📊 API Documentation
+
+### New API Endpoints
+
+#### Disease Outbreak Tracking
+```bash
+# Get disease outbreaks
+GET /api/outbreaks?region=Karnataka&disease=Brown%20Spot
+
+# Report disease outbreak
+POST /api/outbreaks/report
+{
+  "disease": "Brown Spot",
+  "crop": "Paddy",
+  "location": {
+    "latitude": 12.9716,
+    "longitude": 77.5946,
+    "address": "Bangalore Rural, Karnataka",
+    "region": "Karnataka"
+  },
+  "severity": "high",
+  "affectedArea": 5.5
+}
+
+# Get regional statistics
+GET /api/outbreaks/regional-stats?region=Karnataka
+```
+
+#### Real-time Weather with Custom API Keys
+```bash
+# Get current weather with custom API key
+GET /api/weather/current?lat=12.9716&lon=77.5946&apiKey=your-custom-key
+
+# Weather data includes real-time updates and UV index
+```
 
 ### Authentication
 ```bash

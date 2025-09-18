@@ -46,31 +46,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for stored auth token on app load
     const checkAuthStatus = async () => {
-      try {
-        const token = localStorage.getItem('authToken');
-        if (token) {
-          // Validate token with backend
-          const response = await fetch('/api/auth/validate', {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
+      const token = localStorage.getItem('authToken');
+      const userData = localStorage.getItem('userData');
+      
+      if (token && userData) {
+        try {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
           
-          if (response.ok) {
-            const userData = await response.json();
-            setUser(userData.user);
-          } else {
-            localStorage.removeItem('authToken');
-          }
+          fetch('/api/auth/validate', {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          }).then(response => {
+            if (!response.ok) {
+              localStorage.removeItem('authToken');
+              localStorage.removeItem('userData');
+              setUser(null);
+            }
+          }).catch(() => {
+            console.log('Backend not available, using cached auth');
+          });
+        } catch (error) {
+          console.error('Auth parsing error:', error);
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('userData');
+          setUser(null);
         }
-      } catch (error) {
-        console.error('Auth validation error:', error);
-        localStorage.removeItem('authToken');
-      } finally {
-        setIsLoading(false);
       }
+      setIsLoading(false);
     };
 
     checkAuthStatus();
@@ -90,7 +95,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem('authToken', data.token);
+        localStorage.setItem('userData', JSON.stringify(data.user));
         setUser(data.user);
+        window.location.href = '/dashboard';
         return true;
       } else {
         const error = await response.json();
@@ -119,7 +126,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem('authToken', data.token);
+        localStorage.setItem('userData', JSON.stringify(data.user));
         setUser(data.user);
+        window.location.href = '/dashboard';
         return true;
       } else {
         const error = await response.json();
@@ -136,7 +145,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('authToken');
+    localStorage.removeItem('userData');
     setUser(null);
+    window.location.href = '/';
   };
 
   const updateProfile = async (userData: Partial<User>): Promise<boolean> => {
